@@ -1,7 +1,7 @@
-const Joi = require('joi');
-const validate = require('../../helper/validateRequest');
-const RolesModel = require('../roles/rolesModal');
-const UserModel = require('./userModal');
+const Joi = require("joi");
+const validate = require("../../helper/validateRequest");
+const RolesModel = require("../roles/rolesModal");
+const UserModel = require("./userModal");
 const UserMiddleware = {};
 
 UserMiddleware.signUpValidator = (req, res, next) => {
@@ -40,7 +40,7 @@ UserMiddleware.checkRole = async (req, res, next) => {
     return next();
   } else {
     return res.status(400).json({
-      message: req.t('INVALID_ROLE'),
+      message: req.t("INVALID_ROLE"),
       status: false,
     });
   }
@@ -57,7 +57,7 @@ UserMiddleware.checkUsernameAlreadyAdded = async (req, res, next) => {
     ) {
       return res.status(400).json({
         status: false,
-        message: req.t('USERNAME_ALREADY'),
+        message: req.t("USERNAME_ALREADY"),
       });
     } else {
       return next();
@@ -73,7 +73,7 @@ UserMiddleware.checkAddressAvalaible = async (req, res, next) => {
   });
   if (getWalletDetails) {
     return res.status(400).json({
-      message: req.t('WALLET_ADDRESS_ALREADY_REGISTERD'),
+      message: req.t("WALLET_ADDRESS_ALREADY_REGISTERD"),
       status: false,
     });
   } else {
@@ -100,19 +100,19 @@ UserMiddleware.loginCheck = async (req, res, next) => {
 };
 
 // aprove as Creator Validator
-UserMiddleware.ValidateApproveAsCreator = async (req, res, next) => {
-  const userSchema = Joi.array().items({
-    id: Joi.string().required(),
-    status: Joi.boolean().required(),
-  });
+// UserMiddleware.ValidateApproveAsCreator = async (req, res, next) => {
+//   const userSchema = Joi.array().items({
+//     id: Joi.string().required(),
+//     status: Joi.boolean().required(),
+//   });
 
-  const schema = Joi.object({
-    user: userSchema,
-    transactionId: Joi.string().required(),
-  });
+//   const schema = Joi.object({
+//     user: userSchema,
+//     transactionId: Joi.string().required(),
+//   });
 
-  validate.validateRequest(req, res, next, schema);
-};
+//   validate.validateRequest(req, res, next, schema);
+// };
 
 //disable or enable user
 UserMiddleware.disbaleEnableValidator = async (req, res, next) => {
@@ -147,16 +147,16 @@ UserMiddleware.checkAddressAlreadyRegistered = async (req, res, next) => {
     });
     if (checkWalletRegisterded) {
       return res.status(400).json({
-        message: req.t('USER_WALLET_ALREADY_REGISTERED'),
+        message: req.t("USER_WALLET_ALREADY_REGISTERED"),
         status: false,
       });
     } else {
       return next();
     }
   } catch (err) {
-    Utils.echoLog('error in listing user   ', err);
+    Utils.echoLog("error in listing user   ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });
