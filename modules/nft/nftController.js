@@ -1,13 +1,13 @@
-const NftModel = require('./nftModel');
-const CollectionModel = require('./collectionModel');
-const LikeModel = require('../like/likeModel');
-const Utils = require('../../helper/utils');
-const EditionModel = require('../edition/editonModel');
-const HistoryModel = require('../history/historyModel');
+const NftModel = require("./nftModel");
+const CollectionModel = require("./collectionModel");
+const LikeModel = require("../like/likeModel");
+const Utils = require("../../helper/utils");
+const EditionModel = require("../edition/editonModel");
+const HistoryModel = require("../history/historyModel");
 // const EditionModel = require('../edition/editonModel');
-const { statusObject } = require('../../helper/enum');
-const { query } = require('winston');
-const { filter } = require('bluebird');
+const { statusObject } = require("../../helper/enum");
+const { query } = require("winston");
+const { filter } = require("bluebird");
 
 const nftCtr = {};
 // add a new NFT
@@ -23,12 +23,15 @@ nftCtr.addNewNft = async (req, res) => {
       coCreator,
       category,
     } = req.body;
+    console.log("reached");
 
     const createNewNft = new NftModel({
       title: title,
       description: description ? description : null,
       image: image,
-      ownerId: req.role === 'ADMIN' ? req.body.ownerId : req.userData._id,
+      // ownerId: req.role === "ADMIN" ? req.body.ownerId : req.userData._id,
+      ownerId: req.body.ownerId,
+      // ownerId: "dwbejvfmsndbcgoeugd",
       category: category,
       collectionId: collectionId ? collectionId : null,
       digitalKey: digitalKey,
@@ -43,16 +46,16 @@ nftCtr.addNewNft = async (req, res) => {
     const saveNft = await createNewNft.save();
 
     return res.status(200).json({
-      message: req.t('ADD_NEW_NFT'),
+      message: req.t("ADD_NEW_NFT"),
       status: true,
       data: {
         _id: saveNft._id,
       },
     });
   } catch (err) {
-    Utils.echoLog('error in nft create', err);
+    Utils.echoLog("error in nft create", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -72,19 +75,19 @@ nftCtr.addNewCollection = async (req, res) => {
       description,
       category,
       // ownerId: req.role === 'ADMIN' ? req.body.ownerId : req.userData._id,
-      ownerId: '41224d776a326fb40f000001',
+      ownerId: "41224d776a326fb40f000001",
     });
 
     await addNewCollection.save();
 
     return res.status(200).json({
-      message: req.t('COLLECTION_ADDED'),
+      message: req.t("COLLECTION_ADDED"),
       status: true,
     });
   } catch (err) {
-    Utils.echoLog('error in adding new collection', err);
+    Utils.echoLog("error in adding new collection", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -117,7 +120,7 @@ nftCtr.updateCollection = async (req, res) => {
 
         const query = { _id: { $in: req.body.nftId } };
 
-        if (req.role !== 'ADMIN') {
+        if (req.role !== "ADMIN") {
           query.ownerId = req.userData._id;
         }
 
@@ -137,14 +140,14 @@ nftCtr.updateCollection = async (req, res) => {
       await fetchCollection.save();
 
       return res.status(200).json({
-        message: req.t('COLLECTION_UPDATED'),
+        message: req.t("COLLECTION_UPDATED"),
         status: true,
       });
     }
   } catch (err) {
-    Utils.echoLog('error in updating the collection ', err);
+    Utils.echoLog("error in updating the collection ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -204,19 +207,19 @@ nftCtr.updateNft = async (req, res) => {
       }
       await fetchNftDetails.save();
       return res.status(200).json({
-        message: req.t('NFT_UPDATED'),
+        message: req.t("NFT_UPDATED"),
         status: true,
       });
     } else {
       return res.status(400).json({
-        message: req.t('INVALID_NFT'),
+        message: req.t("INVALID_NFT"),
         status: false,
       });
     }
   } catch (err) {
-    Utils.echoLog('error in updating NFT ', err);
+    Utils.echoLog("error in updating NFT ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -236,23 +239,23 @@ nftCtr.getCollectionByUsers = async (req, res) => {
       { isActive: 0, createdAt: 0, updatedAt: 0 }
     )
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { _id: 1, walletAddress: 1, username: 1, profile: 1 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { createdAt: 0, updatedAt: 0 },
       });
 
     return res.status(200).json({
-      message: req.t('COLLECTION_LIST'),
+      message: req.t("COLLECTION_LIST"),
       status: true,
       data: getCollectionByUser,
     });
   } catch (err) {
-    Utils.echoLog('error in getting  collection list', err);
+    Utils.echoLog("error in getting  collection list", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -265,19 +268,19 @@ nftCtr.getSingleCollectionDetails = async (req, res) => {
     const fetchCollectionDetails = await CollectionModel.findById(
       req.params.id
     ).populate({
-      path: 'category',
+      path: "category",
       select: { createdAt: 0, updatedAt: 0 },
     });
 
     return res.status(200).json({
-      message: req.t('COLLECTION_DETAILS'),
+      message: req.t("COLLECTION_DETAILS"),
       status: true,
       data: fetchCollectionDetails,
     });
   } catch (err) {
-    Utils.echoLog('error in collection details list', err);
+    Utils.echoLog("error in collection details list", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -296,11 +299,11 @@ nftCtr.getListOfCollectionForAdmin = async (req, res) => {
       isActive: true,
     })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { _id: 1, walletAddress: 1 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { createdAt: 0, updatedAt: 0 },
       })
       .sort({ createdAt: -1 })
@@ -308,7 +311,7 @@ nftCtr.getListOfCollectionForAdmin = async (req, res) => {
       .limit(+process.env.LIMIT);
 
     return res.status(200).json({
-      message: req.t('COLLECTION_LIST'),
+      message: req.t("COLLECTION_LIST"),
       status: true,
       data: getCollectionList,
       pagination: {
@@ -319,9 +322,9 @@ nftCtr.getListOfCollectionForAdmin = async (req, res) => {
       },
     });
   } catch (err) {
-    Utils.echoLog('error in getting  collection list for admin', err);
+    Utils.echoLog("error in getting  collection list for admin", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -338,19 +341,19 @@ nftCtr.getUserNftDetails = async (req, res) => {
     }
 
     const getAllNftsByUser = await NftModel.find(query).populate({
-      path: 'collectionId',
+      path: "collectionId",
       select: { name: 1, logo: 1 },
     });
 
     return res.status(200).json({
-      message: req.t('NFT_LIST'),
+      message: req.t("NFT_LIST"),
       status: true,
       data: getAllNftsByUser,
     });
   } catch (err) {
-    Utils.echoLog('error in getting nft list ', err);
+    Utils.echoLog("error in getting nft list ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -364,35 +367,35 @@ nftCtr.mintNft = async (req, res) => {
     if (getNftDetails) {
       const currentDate = new Date();
       const hours =
-        getNftDetails.saleState === 'AUCTION'
+        getNftDetails.saleState === "AUCTION"
           ? getNftDetails.auctionTime + 24
           : 0;
       const addHours =
-        getNftDetails.saleState === 'AUCTION' ? new Date().addHours(hours) : 0;
+        getNftDetails.saleState === "AUCTION" ? new Date().addHours(hours) : 0;
 
       getNftDetails.status = statusObject.APPROVED;
       getNftDetails.autionStartDate =
-        getNftDetails.saleState === 'AUCTION' ? +currentDate : 0;
+        getNftDetails.saleState === "AUCTION" ? +currentDate : 0;
       getNftDetails.auctionEndDate =
-        getNftDetails.saleState === 'AUCTION' ? +addHours : 0;
+        getNftDetails.saleState === "AUCTION" ? +addHours : 0;
 
       await getNftDetails.save();
 
       return res.status(200).json({
-        message: req.t('TOKEN_MINTED_ADDED'),
+        message: req.t("TOKEN_MINTED_ADDED"),
         status: true,
         data: getAllNftsByUser,
       });
     } else {
       return res.status(400).json({
-        message: req.t('INVALID_NFT_ID'),
+        message: req.t("INVALID_NFT_ID"),
         status: false,
       });
     }
   } catch (err) {
-    Utils.echoLog('error in mintNft nft  ', err);
+    Utils.echoLog("error in mintNft nft  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -402,35 +405,35 @@ nftCtr.mintNft = async (req, res) => {
 // list user NFT
 nftCtr.listUsersNft = async (req, res) => {
   try {
-    let query = { status: 'APPROVED' };
+    let query = { status: "APPROVED" };
 
-    if (req.query.filter === 'draft') {
-      query.status = 'NOT_MINTED';
+    if (req.query.filter === "draft") {
+      query.status = "NOT_MINTED";
     }
 
     if (req.query.status) {
-      if (req.query.status === 'SOLD') {
-        query.saleState = 'SOLD';
+      if (req.query.status === "SOLD") {
+        query.saleState = "SOLD";
       }
-      if (req.query.status === 'AUCTION') {
-        query.saleState = 'AUCTION';
+      if (req.query.status === "AUCTION") {
+        query.saleState = "AUCTION";
         query.auctionEndDate = { $gte: Math.floor(Date.now() / 1000) };
         // query.expr = { $lt: ['nftSold', 'edition'] };
       }
-      if (req.query.status === 'BUY') {
+      if (req.query.status === "BUY") {
         query = {
           $or: [
             { auctionEndDate: { $lt: Math.floor(Date.now() / 1000) } },
-            { saleState: 'BUY' },
+            { saleState: "BUY" },
           ],
         };
 
-        query.status = 'APPROVED';
+        query.status = "APPROVED";
         // query.expr = { $lt: ['nftSold', 'edition'] };
       }
     }
 
-    if (req.userData && req.userData.role !== 'ADMIN' && !req.params.userId) {
+    if (req.userData && req.userData.role !== "ADMIN" && !req.params.userId) {
       query.ownerId = req.userData._id;
     }
 
@@ -443,28 +446,28 @@ nftCtr.listUsersNft = async (req, res) => {
       unlockContent: 0,
     })
       .populate({
-        path: 'collectionId',
+        path: "collectionId",
         select: { slugText: 0, ownerId: 0, createdAt: 0, updatedAt: 0 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { createdAt: 0, updatedAt: 0 },
       })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { name: 1, username: 1, profile: 1 },
       })
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
-      message: req.t('USER_NFT_LIST'),
+      message: req.t("USER_NFT_LIST"),
       status: true,
       data: list,
     });
   } catch (err) {
-    Utils.echoLog('error in listing user  nft  ', err);
+    Utils.echoLog("error in listing user  nft  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -474,10 +477,10 @@ nftCtr.listUsersNft = async (req, res) => {
 // list nft for admin
 nftCtr.listNftForAdmin = async (req, res) => {
   try {
-    const query = { status: 'APPROVED' };
+    const query = { status: "APPROVED" };
 
-    if (req.query.filter === 'draft') {
-      query.status = 'NOT_MINTED';
+    if (req.query.filter === "draft") {
+      query.status = "NOT_MINTED";
     }
 
     if (req.params.id) {
@@ -491,15 +494,15 @@ nftCtr.listNftForAdmin = async (req, res) => {
 
     const list = await NftModel.find(query, { approvedByAdmin: 0 })
       .populate({
-        path: 'collectionId',
+        path: "collectionId",
         select: { slugText: 0, ownerId: 0, createdAt: 0, updatedAt: 0 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { createdAt: 0, updatedAt: 0 },
       })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { name: 1, username: 1 },
       })
       .sort({ createdAt: -1 })
@@ -507,7 +510,7 @@ nftCtr.listNftForAdmin = async (req, res) => {
       .limit(+process.env.LIMIT);
 
     return res.status(200).json({
-      message: req.t('COLLECTION_LIST'),
+      message: req.t("COLLECTION_LIST"),
       status: true,
       data: list,
       pagination: {
@@ -518,9 +521,9 @@ nftCtr.listNftForAdmin = async (req, res) => {
       },
     });
   } catch (err) {
-    Utils.echoLog('error in listing admin nft  ', err);
+    Utils.echoLog("error in listing admin nft  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -534,19 +537,25 @@ nftCtr.getSingleNftDetails = async (req, res) => {
       JSON.stringify(
         await NftModel.findById(req.params.id)
           .populate({
-            path: 'collectionId',
+            path: "collectionId",
             select: { slugText: 0, ownerId: 0, createdAt: 0, updatedAt: 0 },
           })
           .populate({
-            path: 'category',
+            path: "category",
             select: { createdAt: 0, updatedAt: 0 },
           })
           .populate({
-            path: 'ownerId',
-            select: { name: 1, username: 1, profile: 1, name: 1 },
+            path: "ownerId",
+            select: {
+              name: 1,
+              username: 1,
+              profile: 1,
+              name: 1,
+              walletAddress: 1,
+            },
           })
           .populate({
-            path: 'coCreator.userId',
+            path: "coCreator.userId",
             select: { username: 1, _id: 1, profile: 1 },
           })
       )
@@ -556,7 +565,7 @@ nftCtr.getSingleNftDetails = async (req, res) => {
       nftId: getNftDetails._id,
     })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { name: 1, username: 1, profile: 1, name: 1 },
       })
       .sort({
@@ -599,14 +608,14 @@ nftCtr.getSingleNftDetails = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: req.t('SINGLE_NFT'),
+      message: req.t("SINGLE_NFT"),
       status: true,
       data: getNftDetails,
     });
   } catch (err) {
-    Utils.echoLog('error in getSingleNftDetails  ', err);
+    Utils.echoLog("error in getSingleNftDetails  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -630,9 +639,9 @@ nftCtr.getNftUri = async (req, res) => {
       });
     }
   } catch (err) {
-    Utils.echoLog('error in getNftUri  ', err);
+    Utils.echoLog("error in getNftUri  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -646,7 +655,7 @@ nftCtr.listCollectionNft = async (req, res) => {
       JSON.stringify(
         await CollectionModel.findById(req.params.collectionId)
           .populate({
-            path: 'ownerId',
+            path: "ownerId",
             select: {
               _id: 1,
               walletAddress: 1,
@@ -659,7 +668,7 @@ nftCtr.listCollectionNft = async (req, res) => {
             },
           })
           .populate({
-            path: 'category',
+            path: "category",
             select: { createdAt: 0, updatedAt: 0 },
           })
       )
@@ -675,11 +684,11 @@ nftCtr.listCollectionNft = async (req, res) => {
       { digitalKey: 0, createdAt: 0, updatedAt: 0 }
     )
       .populate({
-        path: 'category',
+        path: "category",
         select: { _id: 1, isActive: 1, image: 1 },
       })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: {
           _id: 1,
           walletAddress: 1,
@@ -738,14 +747,14 @@ nftCtr.listCollectionNft = async (req, res) => {
     //   });
 
     return res.status(200).json({
-      message: req.t('COLLECTION_NFT'),
+      message: req.t("COLLECTION_NFT"),
       status: true,
       data: getCollectionDetails,
     });
   } catch (err) {
-    Utils.echoLog('error in listCollectionNft  ', err);
+    Utils.echoLog("error in listCollectionNft  ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -766,23 +775,23 @@ nftCtr.marketPlace = async (req, res) => {
       // query.saleState = { $in: req.body.filter };
       let filterQuery = [];
       for (let i = 0; i < req.body.filter.length; i++) {
-        if (req.body.filter[i] === 'BUYNOW') {
+        if (req.body.filter[i] === "BUYNOW") {
           filterQuery.push({
             $or: [
               { auctionEndDate: { $lt: Math.floor(Date.now() / 1000) } },
-              { saleState: 'BUY' },
+              { saleState: "BUY" },
             ],
           });
         }
-        if (req.body.filter[i] === 'AUCTION') {
+        if (req.body.filter[i] === "AUCTION") {
           filterQuery.push({
-            saleState: 'AUCTION',
+            saleState: "AUCTION",
             auctionEndDate: { $gte: Math.floor(Date.now() / 1000) },
           });
         }
 
-        if (req.body.filter[i] === 'SOLD') {
-          filterQuery.push({ saleState: 'SOLD' });
+        if (req.body.filter[i] === "SOLD") {
+          filterQuery.push({ saleState: "SOLD" });
         }
       }
 
@@ -797,7 +806,7 @@ nftCtr.marketPlace = async (req, res) => {
     if (req.body.search) {
       query.title = {
         $regex: `${req.body.search.toLowerCase()}.*`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
@@ -810,15 +819,15 @@ nftCtr.marketPlace = async (req, res) => {
       digitalKey: 0,
     })
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { _id: 1, walletAddress: 1, username: 1, profile: 1 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { _id: 1, isActive: 1, image: 1 },
       })
       .populate({
-        path: 'collectionId',
+        path: "collectionId",
         select: { _id: 1, name: 1, description: 1 },
       })
       .skip((+page - 1 || 0) * +process.env.LIMIT)
@@ -826,7 +835,7 @@ nftCtr.marketPlace = async (req, res) => {
       .limit(+process.env.LIMIT);
 
     return res.status(200).json({
-      message: 'NFT_MARKET_PLACE_LIST',
+      message: "NFT_MARKET_PLACE_LIST",
       status: true,
       data: listNftForMarketPlace,
       pagination: {
@@ -839,7 +848,7 @@ nftCtr.marketPlace = async (req, res) => {
   } catch (err) {
     Utils.echoLog(`Error inlist nft for market place`);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -854,7 +863,7 @@ nftCtr.getCollectionsList = async (req, res) => {
     if (req.body.search) {
       query.name = {
         $regex: `${req.body.search.toLowerCase()}.*`,
-        $options: 'i',
+        $options: "i",
       };
     }
 
@@ -867,21 +876,21 @@ nftCtr.getCollectionsList = async (req, res) => {
 
     const getCollections = await CollectionModel.find(query)
       .populate({
-        path: 'ownerId',
+        path: "ownerId",
         select: { _id: 1, walletAddress: 1, username: 1, profile: 1 },
       })
       .populate({
-        path: 'category',
+        path: "category",
         select: { createdAt: 0, updatedAt: 0 },
       })
       .sort({ createdAt: -1 })
       .skip((+page - 1 || 0) * +process.env.LIMIT)
       .limit(+process.env.LIMIT);
 
-    console.log('this', getCollections);
+    console.log("this", getCollections);
 
     return res.status(200).json({
-      message: req.t('COLLECTION_LIST'),
+      message: req.t("COLLECTION_LIST"),
       status: true,
       data: getCollections,
       pagination: {
@@ -894,7 +903,7 @@ nftCtr.getCollectionsList = async (req, res) => {
   } catch (err) {
     Utils.echoLog(`Error in getCollectionsList ${err}`);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -911,7 +920,7 @@ nftCtr.getNftHistory = async (req, res) => {
       nftId: req.params.nftId,
       editionNo: null,
     }).populate({
-      path: 'ownerId',
+      path: "ownerId",
       select: { _id: 1, walletAddress: 1, username: 1, profile: 1 },
     });
 
@@ -922,7 +931,7 @@ nftCtr.getNftHistory = async (req, res) => {
           editionNo: edition,
         })
           .populate({
-            path: 'ownerId',
+            path: "ownerId",
             select: { _id: 1, walletAddress: 1, username: 1, profile: 1 },
           })
           .sort({ createdAt: 1 })
@@ -933,14 +942,14 @@ nftCtr.getNftHistory = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: req.t('NFT_HISTORY'),
+      message: req.t("NFT_HISTORY"),
       status: true,
       data: fetchNftHistory,
     });
   } catch (err) {
     Utils.echoLog(`Error inlist nft for market place`);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -969,26 +978,26 @@ nftCtr.getLikedNfts = async (req, res) => {
         { digitalKey: 0, createdAt: 0, updatedAt: 0 }
       )
         .populate({
-          path: 'collectionId',
+          path: "collectionId",
           select: { slugText: 0, ownerId: 0, createdAt: 0, updatedAt: 0 },
         })
         .populate({
-          path: 'category',
+          path: "category",
           select: { createdAt: 0, updatedAt: 0 },
         })
         .populate({
-          path: 'ownerId',
+          path: "ownerId",
           select: { name: 1, username: 1, profile: 1, name: 1 },
         });
 
       return res.status(200).json({
-        message: 'LIKED_NFT',
+        message: "LIKED_NFT",
         status: true,
         data: nfts,
       });
     } else {
       return res.status(200).json({
-        message: 'LIKED_NFT',
+        message: "LIKED_NFT",
         status: true,
         data: [],
       });
@@ -996,7 +1005,7 @@ nftCtr.getLikedNfts = async (req, res) => {
   } catch (err) {
     Utils.echoLog(`Error in list liked nfts `);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -1009,10 +1018,10 @@ nftCtr.getUserBuyedNfts = async (req, res) => {
     let query = { isBurned: false };
     if (req.params.userId) {
       query.ownerId = req.params.userId;
-      query.transactionId = { $ne: '0x' };
+      query.transactionId = { $ne: "0x" };
     } else {
       query.ownerId = req.userData._id;
-      query.transactionId = { $ne: '0x' };
+      query.transactionId = { $ne: "0x" };
     }
 
     const editions = await EditionModel.find(query);
@@ -1028,26 +1037,26 @@ nftCtr.getUserBuyedNfts = async (req, res) => {
         { digitalKey: 0, createdAt: 0, updatedAt: 0 }
       )
         .populate({
-          path: 'collectionId',
+          path: "collectionId",
           select: { slugText: 0, ownerId: 0, createdAt: 0, updatedAt: 0 },
         })
         .populate({
-          path: 'category',
+          path: "category",
           select: { createdAt: 0, updatedAt: 0 },
         })
         .populate({
-          path: 'ownerId',
+          path: "ownerId",
           select: { name: 1, username: 1, profile: 1, name: 1 },
         });
 
       return res.status(200).json({
-        message: 'USER_OWNED_NFT',
+        message: "USER_OWNED_NFT",
         status: true,
         data: fetchUserNft,
       });
     } else {
       return res.status(200).json({
-        message: 'USER_OWNED_NFT',
+        message: "USER_OWNED_NFT",
         status: true,
         data: [],
       });
@@ -1055,7 +1064,7 @@ nftCtr.getUserBuyedNfts = async (req, res) => {
   } catch (err) {
     Utils.echoLog(`Error in list user buyed nfts `);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });
@@ -1070,15 +1079,15 @@ nftCtr.addNftToSecondHandSales = async (req, res) => {
     });
 
     if (fetchEditionDetails) {
-      if (req.body.saleType === 'BUY') {
-        fetchEditionDetails.saleType.type = 'BUY';
-        fetchEditionDetails.saleAction = 'SECOND_HAND';
+      if (req.body.saleType === "BUY") {
+        fetchEditionDetails.saleType.type = "BUY";
+        fetchEditionDetails.saleAction = "SECOND_HAND";
         fetchEditionDetails.saleType.price = +req.body.price;
         fetchEditionDetails.isOpenForSale = true;
       }
-      if (req.body.saleType === 'OFFER') {
-        fetchEditionDetails.saleType.type = 'OFFER';
-        fetchEditionDetails.saleAction = 'SECOND_HAND';
+      if (req.body.saleType === "OFFER") {
+        fetchEditionDetails.saleType.type = "OFFER";
+        fetchEditionDetails.saleAction = "SECOND_HAND";
         fetchEditionDetails.saleType.price = 0;
         fetchEditionDetails.isOpenForSale = true;
       }
@@ -1086,19 +1095,19 @@ nftCtr.addNftToSecondHandSales = async (req, res) => {
       await fetchEditionDetails.save();
 
       return res.status(200).json({
-        message: req.t('EDITION_UPDATED'),
+        message: req.t("EDITION_UPDATED"),
         status: true,
       });
     } else {
       return res.status(400).json({
-        message: req.t('INVALID_EDITION_DETAILS'),
+        message: req.t("INVALID_EDITION_DETAILS"),
         status: false,
       });
     }
   } catch (err) {
     Utils.echoLog(`Err in addNftToSecondHandSales ${err}`);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: false,
       err: err.message ? err.message : err,
     });

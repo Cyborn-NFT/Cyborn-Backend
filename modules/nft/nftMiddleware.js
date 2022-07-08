@@ -1,9 +1,9 @@
-const Joi = require('joi');
-const validate = require('../../helper/validateRequest');
-const NftModel = require('./nftModel');
-const CollectionModel = require('./collectionModel');
-const EditionModel = require('../edition/editonModel');
-const Utils = require('../../helper/utils');
+const Joi = require("joi");
+const validate = require("../../helper/validateRequest");
+const NftModel = require("./nftModel");
+const CollectionModel = require("./collectionModel");
+const EditionModel = require("../edition/editonModel");
+const Utils = require("../../helper/utils");
 
 const NftMiddleware = {};
 // validate add request body
@@ -21,11 +21,11 @@ NftMiddleware.validateAdd = async (req, res, next) => {
 
   const schema = Joi.object({
     title: Joi.string().required(),
-    description: Joi.string().allow(null, ''),
+    description: Joi.string().allow(null, ""),
     image: imageSchema,
     ownerId: Joi.string(),
     collectionId: Joi.string(),
-    digitalKey: Joi.alternatives().conditional('unlockContent', {
+    digitalKey: Joi.alternatives().conditional("unlockContent", {
       is: 1,
       then: Joi.string().required(),
       otherwise: Joi.string(),
@@ -33,10 +33,10 @@ NftMiddleware.validateAdd = async (req, res, next) => {
     unlockContent: Joi.boolean().required(),
     coCreator: coCreatorSchema,
     price: Joi.number().required(),
-    saleState: Joi.string().valid('BUY', 'AUCTION').required(),
+    saleState: Joi.string().valid("BUY", "AUCTION").required(),
     category: Joi.array().items(Joi.string()).required(),
-    auctionTime: Joi.alternatives().conditional('saleState', {
-      is: 'AUCTION',
+    auctionTime: Joi.alternatives().conditional("saleState", {
+      is: "AUCTION",
       then: Joi.number().required(),
       otherwise: Joi.number(),
     }),
@@ -48,7 +48,7 @@ NftMiddleware.validateAdd = async (req, res, next) => {
 // check collection id valid or not
 NftMiddleware.checkCollection = async (req, res, next) => {
   try {
-    if (req.body.collectionId && req.role !== 'ADMIN') {
+    if (req.body.collectionId && req.role !== "ADMIN") {
       const checkCollection = await CollectionModel.findOne({
         _id: req.body.collectionId,
         ownerId: req.userData._id,
@@ -58,19 +58,19 @@ NftMiddleware.checkCollection = async (req, res, next) => {
         return next();
       } else {
         return res.status(200).json({
-          message: req.t('INVALID_COLLECTION'),
+          message: req.t("INVALID_COLLECTION"),
           status: false,
         });
       }
-    } else if (req.role === 'ADMIN') {
+    } else if (req.role === "ADMIN") {
       return next();
     } else {
       return next();
     }
   } catch (err) {
-    Utils.echoLog('error in collection middleware', err);
+    Utils.echoLog("error in collection middleware", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });
@@ -81,7 +81,7 @@ NftMiddleware.checkCollection = async (req, res, next) => {
 NftMiddleware.validateAddCollection = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().required(),
-    description: Joi.string().allow(null, ''),
+    description: Joi.string().allow(null, ""),
     logo: Joi.string().required(),
     category: Joi.array().items(Joi.string()).required(),
   });
@@ -99,16 +99,16 @@ NftMiddleware.checkCollectionAlreadyAdded = async (req, res, next) => {
 
     if (checkAlreadyAvalaible) {
       return res.status(400).json({
-        message: req.t('COLLECTION_ALREADY'),
+        message: req.t("COLLECTION_ALREADY"),
         status: false,
       });
     } else {
       return next();
     }
   } catch (err) {
-    Utils.echoLog('error in checkCollectionAlreadyAdded middleware ', err);
+    Utils.echoLog("error in checkCollectionAlreadyAdded middleware ", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });
@@ -130,17 +130,17 @@ NftMiddleware.validateNftUpdate = async (req, res, next) => {
 
   const schema = Joi.object({
     title: Joi.string(),
-    description: Joi.string().allow(null, ''),
+    description: Joi.string().allow(null, ""),
     image: imageSchema,
     ownerId: Joi.string(),
     collectionId: Joi.string(),
     unlockContent: Joi.boolean(),
     coCreator: coCreatorSchema,
     price: Joi.number(),
-    saleState: Joi.string().valid('BUY', 'AUCTION'),
+    saleState: Joi.string().valid("BUY", "AUCTION"),
     category: Joi.array().items(Joi.string()),
     auctionTime: Joi.number(),
-    digitalKey: Joi.alternatives().conditional('unlockContent', {
+    digitalKey: Joi.alternatives().conditional("unlockContent", {
       is: 1,
       then: Joi.string().required(),
       otherwise: Joi.string(),
@@ -155,7 +155,7 @@ NftMiddleware.validateNftUpdate = async (req, res, next) => {
 NftMiddleware.validateCollectionUpdate = async (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string(),
-    description: Joi.string().allow(null, ''),
+    description: Joi.string().allow(null, ""),
     logo: Joi.string(),
     nftId: Joi.array(),
     category: Joi.array().items(Joi.string()),
@@ -172,31 +172,31 @@ NftMiddleware.canUpdateNft = async (req, res, next) => {
     if (
       getNftDetails &&
       getNftDetails.ownerId.toString() === req.userData._id.toString() &&
-      getNftDetails.status === 'NOT_MINTED'
+      getNftDetails.status === "NOT_MINTED"
     ) {
       return next();
-    } else if (req.role === 'ADMIN') {
+    } else if (req.role === "ADMIN") {
       return next();
     } else if (
       getNftDetails &&
       getNftDetails.ownerId.toString() === req.userData._id.toString() &&
-      (getNftDetails.status === 'APPROVED' ||
-        getNftDetails.status === 'PENDING')
+      (getNftDetails.status === "APPROVED" ||
+        getNftDetails.status === "PENDING")
     ) {
       return res.status(400).json({
-        message: req.t('NFT_CANT'),
+        message: req.t("NFT_CANT"),
         status: false,
       });
     } else {
       return res.status(403).json({
-        message: req.t('NOT_AUTHROZIED'),
+        message: req.t("NOT_AUTHROZIED"),
         status: false,
       });
     }
   } catch (err) {
-    Utils.echoLog('error in can update middleware', err);
+    Utils.echoLog("error in can update middleware", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });
@@ -213,18 +213,18 @@ NftMiddleware.canUpdateCollection = async (req, res, next) => {
       getCollectionDetails.ownerId.toString() === req.userData._id.toString()
     ) {
       return next();
-    } else if (req.role === 'ADMIN') {
+    } else if (req.role === "ADMIN") {
       return next();
     } else {
       return res.status(403).json({
-        message: req.t('NOT_AUTHROZIED'),
+        message: req.t("NOT_AUTHROZIED"),
         status: false,
       });
     }
   } catch (err) {
-    Utils.echoLog('error in can update middleware', err);
+    Utils.echoLog("error in can update middleware", err);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });
@@ -233,27 +233,28 @@ NftMiddleware.canUpdateCollection = async (req, res, next) => {
 
 // can add nft
 NftMiddleware.canAddNft = async (req, res, next) => {
-  if (req.role === 'ADMIN') {
-    return next();
-  } else if (
-    req.role === 'CREATOR' &&
-    req.userData &&
-    req.userData.acceptedByAdmin
-  ) {
-    return next();
-  } else {
-    return res.status(403).json({
-      message: req.t('NOT_AUTHROZIED'),
-      status: false,
-    });
-  }
+  return next();
+  // if (req.role === 'ADMIN') {
+  //   return next();
+  // } else if (
+  //   req.role === 'CREATOR' &&
+  //   req.userData &&
+  //   req.userData.acceptedByAdmin
+  // ) {
+  //   return next();
+  // } else {
+  //   return res.status(403).json({
+  //     message: req.t('NOT_AUTHROZIED'),
+  //     status: false,
+  //   });
+  // }
 };
 
 //validate input for edition update
 NftMiddleware.EditionUpdate = async (req, res, next) => {
   const schema = Joi.object({
     editionId: Joi.string().required(),
-    saleType: Joi.string().valid('BUY', 'OFFER'),
+    saleType: Joi.string().valid("BUY", "OFFER"),
     price: Joi.number(),
   });
   validate.validateRequest(req, res, next, schema);
@@ -269,7 +270,7 @@ NftMiddleware.checkEditionOwner = async (req, res, next) => {
 
     if (!fetchEdition) {
       return res.status(400).json({
-        message: req.t('YOU_ARE_NOT_OWNER'),
+        message: req.t("YOU_ARE_NOT_OWNER"),
         status: false,
       });
     }
@@ -278,7 +279,7 @@ NftMiddleware.checkEditionOwner = async (req, res, next) => {
   } catch (err) {
     Utils.echoLog(`Error in checkEditionOwner ${err}`);
     return res.status(500).json({
-      message: req.t('DB_ERROR'),
+      message: req.t("DB_ERROR"),
       status: true,
       err: err.message ? err.message : err,
     });

@@ -1,9 +1,9 @@
-const Utils = require('../../../helper/utils');
-const Joi = require('joi');
-const validate = require('../../../helper/validateRequest');
-const asyncRedis = require('async-redis');
+const Utils = require("../../../helper/utils");
+const Joi = require("joi");
+const validate = require("../../../helper/validateRequest");
+const asyncRedis = require("async-redis");
 const client = asyncRedis.createClient();
-const { cachedData } = require('../../../helper/enum');
+const { cachedData } = require("../../../helper/enum");
 
 const ProfileInfoMiddleware = {};
 
@@ -43,7 +43,7 @@ ProfileInfoMiddleware.listProfileInfo = async (req, res, next) => {
 
     if (checkCacheAvalaible && checkCacheAvalaible.length) {
       return res.status(200).json({
-        message: req.t('PROFILE_INFO_LIST'),
+        message: req.t("PROFILE_INFO_LIST"),
         status: true,
         data: JSON.parse(checkCacheAvalaible),
       });

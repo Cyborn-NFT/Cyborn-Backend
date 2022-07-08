@@ -119,7 +119,8 @@ BannerCtr.list = async (req, res) => {
       { isActive: 0, createdAt: 0, updatedAt: 0 }
     ).sort({ createdAt: -1 });
     if (getList) {
-      await client.set('banner-list', JSON.stringify(getList), 'EX', 60 * 10);
+      await client.set('banner-list', JSON.stringify(getList), 'EX', 60 * 10) ;
+
       return res.status(200).json({
         message: req.t('BANNER_LIST'),
         status: true,
